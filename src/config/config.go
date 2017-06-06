@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"whale_saver/vendor/src/gopkg.in/yaml.v2"
 	"io/ioutil"
+	"gopkg.in/yaml.v2"
 )
 
 type instanses struct {
