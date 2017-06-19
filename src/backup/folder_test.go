@@ -4,6 +4,7 @@ import (
 	"testing"
 	"config"
 	"os"
+	"fmt"
 )
 
 func TestBackupDb(t *testing.T) {
@@ -20,9 +21,13 @@ func TestBackupDb(t *testing.T) {
 			tempImage:  "busybox",
 		},
 	}
-	_, err := volumeBackup.Backup()
+	process := make(chan string)
+	err := volumeBackup.Backup(&process)
 	if err != nil {
 		t.Errorf(err.Error())
+	}
+	for {
+		fmt.Println(<-process)
 	}
 
 }
@@ -38,8 +43,12 @@ func TestBackupWeb(t *testing.T) {
 			tempImage:  "busybox",
 		},
 	}
-	_, err := volumeBackup.Backup()
+	process := make(chan string)
+	err := volumeBackup.Backup(&process)
 	if err != nil {
 		t.Errorf(err.Error())
+	}
+	for {
+		fmt.Println(<-process)
 	}
 }

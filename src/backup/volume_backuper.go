@@ -3,7 +3,7 @@ package backup
 import (
 	"config"
 	"fmt"
-	"time"
+	"sync"
 )
 
 type VolumeBackuper struct {
@@ -15,9 +15,11 @@ func (vb *VolumeBackuper) LoadConfig(config config.Configuration) {
 }
 
 func (vb *VolumeBackuper) Run() {
+	var wg sync.WaitGroup
 	errors := make(chan string)
 	processing := make(chan string)
-	vb.processFolders(processing, errors)
+	finished := make(chan bool)
+	vb.processFolders(&wg, processing, errors, finished)
 	go func() {
 		for {
 			select {
@@ -25,21 +27,26 @@ func (vb *VolumeBackuper) Run() {
 				fmt.Println("Error:", errorString)
 			case process := <-processing:
 				fmt.Println(process)
+			case <-finished:
+				fmt.Println("Jobs done!")
+				return
 			}
 		}
 	}()
-	time.Sleep(10000000000)
+	wg.Wait()
+	finished <- true
 }
 
-func (vb *VolumeBackuper) processFolders(process chan string, errors chan string) {
+func (vb *VolumeBackuper) processFolders(wg *sync.WaitGroup, process chan string, errors chan string, finished chan bool) {
 	folders := vb.getFolders()
 	for _, folder := range folders {
+		wg.Add(1)
 		go func() {
 			process <- fmt.Sprintf("Backup folder %s in volume %s started",
 				folder.Params.path,
 				folder.Params.volumeName,
 			)
-			err := folder.Backup(process)
+			err := folder.Backup(&process)
 			process <- fmt.Sprintf("Backup folder %s in volume %s completed. Backup file in %s",
 				folder.Params.path,
 				folder.Params.volumeName,
@@ -48,6 +55,7 @@ func (vb *VolumeBackuper) processFolders(process chan string, errors chan string
 			if err != nil {
 				errors <- err.Error()
 			}
+			wg.Done()
 		}()
 	}
 }

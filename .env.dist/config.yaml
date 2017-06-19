@@ -13,7 +13,7 @@ instanсes:
                               # where local backup file store
                               destFolder: "/home/karachun/backup"
                               # where backup in temporary image store
-                              destName: "/home/karachun/backup"
+                              destName: "web_backup"
                               # Sending backup to remote server
                               send:
                                   toYandex:

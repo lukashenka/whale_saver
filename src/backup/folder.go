@@ -20,26 +20,26 @@ type FolderBackup struct {
 	Params BackupParams
 }
 
-func (vb *FolderBackup) Backup() (chan string, error) {
+func (vb *FolderBackup) Backup(process *chan string) (error) {
 
-	process := make(chan string)
 	err := vb.validateParams()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	process <- fmt.Sprintf("Backup params validated")
+	*process <- fmt.Sprintf("Backup params validated")
 
 	command := vb.getBackupCmd()
-	process <- fmt.Sprintf("Command generated:")
-	process <- fmt.Sprintf(command)
+	*process <- fmt.Sprintf("Command generated:")
+	*process <- fmt.Sprintf(command)
 	out, err := exec.Command("sh", "-c", command).Output()
-	process <- fmt.Sprintf("Command executed:")
-	process <- fmt.Sprintf(string(out))
+	*process <- fmt.Sprintf("Command executed:")
+	*process <- fmt.Sprintf(string(out))
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
+
 
 func (vb *FolderBackup) validateParams() error {
 	destFolder := vb.Params.destFolder
