@@ -48,11 +48,12 @@ instanсes:
                   # where backup in temporary image store
                   destName: "2kolamysqldump"
                   container: "2kola_mysql"
-                  database: "2kola"
+                  database: "wordpress"
                   user: "2kola"
                   pass: "2kola"
                   mysqldumpParams:
-                          - "--skip-add-locks=true"
+                          - "--skip-add-drop-table"
+                          - "--single-transaction"
 
 
 backup_file_send:
