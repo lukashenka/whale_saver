@@ -7,6 +7,7 @@ import (
 	"strings"
 	"os/exec"
 	"os"
+	"syscall"
 	"github.com/pkg/errors"
 )
 
@@ -33,6 +34,7 @@ func (md *MysqlDumper) LoadParams(
 	md.containerName = containerName
 	md.user = user
 	md.password = password
+	md.database = database
 	md.mysqldumpParams = mysqldumpParams
 	md.destName = destName
 	md.destFolder = destFolder
@@ -44,15 +46,28 @@ func (md *MysqlDumper) Dump(process *chan string) error {
 	command := md.getBackupCmd()
 	*process <- fmt.Sprintf("Command generated:")
 	*process <- fmt.Sprintf(command)
-	out, err := exec.Command("sh", "-c", command).Output()
-	*process <- fmt.Sprintf("Command executed:")
-	*process <- fmt.Sprintf(string(out))
-	if err != nil {
+	cmd := exec.Command("sh", "-c", command)
+
+	var waitStatus syscall.WaitStatus
+	if out, err := cmd.CombinedOutput(); err != nil {
+		// Did the command fail because of an unsuccessful exit code
+		if exitError, ok := err.(*exec.ExitError); ok {
+			waitStatus = exitError.Sys().(syscall.WaitStatus)
+			*process <- fmt.Sprintf("Exit code: %d", waitStatus.ExitStatus())
+			*process <- string(out)
+		}
 		return err
+	} else {
+		// Command was successful
+		if len(out) > 0 {
+			*process <- string(out)
+			return errors.New("Unexcepted output")
+		}
+		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
+		*process <- fmt.Sprintf("%d", waitStatus.ExitStatus())
 	}
-	if len(out) > 0 {
-		return errors.New(fmt.Sprintf("Unexcepted out: %s", out))
-	}
+
+	*process <- fmt.Sprintf("Command executed:")
 	return nil
 }
 
