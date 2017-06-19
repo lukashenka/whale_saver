@@ -41,7 +41,7 @@ func (vb *VolumeBackuper) processFolders(wg *sync.WaitGroup, process chan string
 	folders := vb.getFolders()
 	for _, folder := range folders {
 		wg.Add(1)
-		go func() {
+		go func(folder FolderBackup) {
 			process <- fmt.Sprintf("Backup folder %s in volume %s started",
 				folder.Params.path,
 				folder.Params.volumeName,
@@ -56,7 +56,7 @@ func (vb *VolumeBackuper) processFolders(wg *sync.WaitGroup, process chan string
 				errors <- err.Error()
 			}
 			wg.Done()
-		}()
+		}(folder)
 	}
 }
 
