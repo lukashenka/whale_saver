@@ -1,4 +1,4 @@
-instanses:
+instanсes:
 #        Data in volumes for backup
         volumes:
               # name of volume where data storage
@@ -6,9 +6,37 @@ instanses:
                     # folders to backup
                     folders:
                           web:
+                              #folder in container for backup
                               path: /var/www
-                              basefileName: "webdata"
-                              # Where backup must storage
+                              # temporary docker image name where backup will processing
+                              tempImage: "busybox"
+                              # where local backup file store
+                              destFolder: "/home/karachun/backup"
+                              # where backup in temporary image store
+                              destName: "/home/karachun/backup"
+                              # Sending backup to remote server
+                              send:
+                                  toYandex:
+                                      yandex_disk:
+                                            account: karachungen
+                                  email:
+                                      email:
+                                            to: "karachungen@gmail.com"
+                                            from: "backup@sadsad.com"
+                              deleteAfter: true
+              2kola_db2:
+                    # folders to backup
+                    folders:
+                          web:
+                              #folder in container for backup
+                              path: /var/www
+                              # temporary docker image name where backup will processing
+                              tempImage: "busybox"
+                              # where local backup file store
+                              destFolder: "/home/karachun/backup"
+                              # where backup in temporary image store
+                              destName: "/home/karachun/backup"
+                              # Sending backup to remote server
                               send:
                                   toYandex:
                                       yandex_disk:

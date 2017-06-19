@@ -16,27 +16,32 @@ type BackupParams struct {
 	tempImage  string // image where backup temporary stored
 }
 
-type VolumeBackup struct {
+type FolderBackup struct {
 	Params BackupParams
 }
 
-func (vb *VolumeBackup) Backup() error {
+func (vb *FolderBackup) Backup() (chan string, error) {
 
+	process := make(chan string)
 	err := vb.validateParams()
 	if err != nil {
-		return err
+		return nil, err
 	}
+	process <- fmt.Sprintf("Backup params validated")
 
 	command := vb.getBackupCmd()
+	process <- fmt.Sprintf("Command generated:")
+	process <- fmt.Sprintf(command)
 	out, err := exec.Command("sh", "-c", command).Output()
-	fmt.Println(out)
+	process <- fmt.Sprintf("Command executed:")
+	process <- fmt.Sprintf(string(out))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
-func (vb *VolumeBackup) validateParams() error {
+func (vb *FolderBackup) validateParams() error {
 	destFolder := vb.Params.destFolder
 	if _, err := os.Stat(destFolder); err != nil {
 		if os.IsNotExist(err) {
@@ -47,7 +52,7 @@ func (vb *VolumeBackup) validateParams() error {
 	return nil
 }
 
-func (vb *VolumeBackup) getBackupCmd() string {
+func (vb *FolderBackup) getBackupCmd() string {
 	timeString := strconv.Itoa(int(time.Now().Unix()))
 	fileName := vb.Params.destName + timeString
 	command := fmt.Sprintf("docker run --rm --volume %s:%s -v %s:/backup %s tar cvf /backup/%s.tar.gz %s",

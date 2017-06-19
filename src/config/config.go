@@ -1,45 +1,48 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
 )
 
-type instanses struct {
-	Volumes map[string]volume `yaml:"volumes"`
+type Instances struct {
+	Volumes map[string]Volume `yaml:"volumes"`
 }
 
-type volume struct {
-	Container string   `yaml:"container_name"`
-	Folders   []string `yaml:"folders"`
+type Folder struct {
+	Path       string `yaml:"path"`
+	DestFolder string `yaml:"destFolder"`  // to path in local storage
+	DestName   string `yaml:"destName"` // to file name in local storage
+	TempImage  string `yaml:"tempImage"` // image where backup temporary stored
 }
-type config struct {
-	Instanses instanses `yaml:"instanses"`
+type Volume struct {
+	Folders map[string]Folder `yaml:"folders"`
+}
+type Config struct {
+	Instances Instances `yaml:"instanсes"`
+	BackupFileSend interface{} `yaml:"backup_file_send"`
 }
 
 type Configuration struct {
 	filename string
-	config   config
+	config   Config
 }
 
 func (c *Configuration) Load(fileName string) error {
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
-	config := config{}
-
-	yaml.Unmarshal([]byte(data), &config)
-
+	config := Config{}
+	err = yaml.Unmarshal([]byte(data), &config)
+	if err != nil {
+		return err
+	}
 	c.config = config
-
-
-
 	return nil
 }
 
-func (c *Configuration)GetVolumes() map[string]volume  {
-	return c.config.Instanses.Volumes
+
+func (c *Configuration) GetVolumes() map[string]Volume {
+	return c.config.Instances.Volumes
 }
