@@ -5,50 +5,54 @@ instanсes:
               2kola_db:
                     # folders to backup
                     folders:
-                          web:
+                          mysql:
                               #folder in container for backup
-                              path: /var/www
+                              path: /var/lib/mysql
                               # temporary docker image name where backup will processing
                               tempImage: "busybox"
                               # where local backup file store
                               destFolder: "/home/karachun/backup"
                               # where backup in temporary image store
-                              destName: "web_backup"
-                              # Sending backup to remote server
-                              send:
-                                  toYandex:
-                                      yandex_disk:
-                                            account: karachungen
-                                  email:
-                                      email:
-                                            to: "karachungen@gmail.com"
-                                            from: "backup@sadsad.com"
-                              deleteAfter: true
-              2kola_db2:
+                              destName: "mysql"
+              # name of volume where data storage
+              2kola_web:
                     # folders to backup
                     folders:
-                          web:
+                          mysql:
                               #folder in container for backup
-                              path: /var/www
+                              path: /var/www/html
                               # temporary docker image name where backup will processing
                               tempImage: "busybox"
                               # where local backup file store
                               destFolder: "/home/karachun/backup"
                               # where backup in temporary image store
-                              destName: "/home/karachun/backup"
-                              # Sending backup to remote server
-                              send:
-                                  toYandex:
-                                      yandex_disk:
-                                            account: karachungen
-                                  email:
-                                      email:
-                                            to: "karachungen@gmail.com"
-                                            from: "backup@sadsad.com"
-                              deleteAfter: true
-
-
-
+                              destName: "web"
+              # name of volume where data storage
+              2kola_web_uploads:
+                    # folders to backup
+                    folders:
+                          mysql:
+                              #folder in container for backup
+                              path: /var/www/html/wp-content/uploads
+                              # temporary docker image name where backup will processing
+                              tempImage: "busybox"
+                              # where local backup file store
+                              destFolder: "/home/karachun/backup"
+                              # where backup in temporary image store
+                              destName: "web_uploads"
+#       Running mysqldump in containers
+        mysql:
+              2koladb:
+                  # where local backup file store
+                  destFolder: "/home/karachun/backup"
+                  # where backup in temporary image store
+                  destName: "2kolamysqldump"
+                  container: "2kola_mysql"
+                  database: "2kola"
+                  user: "2kola"
+                  pass: "2kola"
+                  mysqldumpParams:
+                          - "--skip-add-locks=true"
 
 
 backup_file_send:

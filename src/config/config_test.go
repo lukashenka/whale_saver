@@ -15,6 +15,9 @@ func TestConfig(t *testing.T) {
 	if len(configuration.GetVolumes()) == 0 {
 		t.Error("Volumes must me more than 0")
 	}
+	if len(configuration.GetMysqlInstances()) == 0 {
+		t.Error("Mysql instances must me more than 0")
+	}
 
 }
 

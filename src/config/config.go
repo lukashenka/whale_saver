@@ -6,20 +6,31 @@ import (
 )
 
 type Instances struct {
-	Volumes map[string]Volume `yaml:"volumes"`
+	Volumes      map[string]Volume `yaml:"volumes"`
+	MysqlDumpers map[string]MysqlDump `yaml:"mysql"`
 }
 
 type Folder struct {
 	Path       string `yaml:"path"`
-	DestFolder string `yaml:"destFolder"`  // to path in local storage
-	DestName   string `yaml:"destName"` // to file name in local storage
-	TempImage  string `yaml:"tempImage"` // image where backup temporary stored
+	DestFolder string `yaml:"destFolder"` // to path in local storage
+	DestName   string `yaml:"destName"`   // to file name in local storage
+	TempImage  string `yaml:"tempImage"`  // image where backup temporary stored
 }
 type Volume struct {
 	Folders map[string]Folder `yaml:"folders"`
 }
+type MysqlDump struct {
+	DestFolder      string `yaml:"destFolder"`
+	DestName        string `yaml:"destName"`
+	Container       string `yaml:"container"`
+	Database        string `yaml:"database"`
+	User            string `yaml:"user"`
+	Pass            string `yaml:"pass"`
+	MysqldumpParams []string `yaml:"mysqldumpParams"`
+}
+
 type Config struct {
-	Instances Instances `yaml:"instanсes"`
+	Instances      Instances `yaml:"instanсes"`
 	BackupFileSend interface{} `yaml:"backup_file_send"`
 }
 
@@ -42,7 +53,10 @@ func (c *Configuration) Load(fileName string) error {
 	return nil
 }
 
-
 func (c *Configuration) GetVolumes() map[string]Volume {
 	return c.config.Instances.Volumes
+}
+
+func (c *Configuration) GetMysqlDumpers() map[string]MysqlDump {
+	return c.config.Instances.MysqlDumpers
 }
